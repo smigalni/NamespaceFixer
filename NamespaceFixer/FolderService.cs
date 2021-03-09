@@ -12,8 +12,9 @@ namespace NamespaceFixer
         {
             _projectFileService = new ProjectFileService();
         }
-        public void CompareProjectFolderWithCsprojFile(string rootPath)
+        public List<string> CompareProjectFolderWithCsprojFile(string rootPath)
         {
+            var listDirs = new List<string>();
             var paths = Directory.GetFiles(rootPath, "*.csproj", SearchOption.AllDirectories).ToList();
 
             var csprojList = new List<string>();
@@ -24,6 +25,7 @@ namespace NamespaceFixer
                 var filename = Path.GetFileName(path).Replace(".csproj", string.Empty);
                 csprojList.Add(filename);
                 var dirName = Path.GetDirectoryName(path);
+                listDirs.Add(dirName);
                 var lastDirName = dirName.Split(Path.DirectorySeparatorChar).Last();
 
                 if (filename != lastDirName)
@@ -36,6 +38,7 @@ namespace NamespaceFixer
 
                 CheckRootNamespaces(csprojList,rootNamespaceList);
             }
+            return listDirs;
 
         }
 

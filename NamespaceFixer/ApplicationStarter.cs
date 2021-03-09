@@ -22,11 +22,11 @@ namespace NamespaceFixer
         private string _rootNamespace = default;
         public void Start(string rootPath)
         {
-            _folderSerivce.CompareProjectFolderWithCsprojFile(rootPath);
-            var dirs = Directory.GetDirectories(rootPath, "*").ToList();
+            var dirList = _folderSerivce.CompareProjectFolderWithCsprojFile(rootPath);
+            //var dirs = Directory.GetDirectories(rootPath, "*").ToList();
 
             var foldersList = new List<string>();
-            foreach (var folder in dirs)
+            foreach (var folder in dirList)
             {
                 var name = folder.Remove(0, rootPath.Length);
                 FilterList(foldersList, name, folder, rootPath);
