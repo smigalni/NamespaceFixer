@@ -2,30 +2,38 @@
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Xml;
 
 namespace NamespaceFixer
 {
     public class ApplicationStarter
     {
-        private string rootPath = @"C:\Users\serge\source\repos\WebApplication1";
+        private readonly FolderService _folderSerivce;
+        private readonly ProjectFileService _projectFileService;
+
+        public ApplicationStarter()
+        {
+            _folderSerivce = new FolderService();
+            _projectFileService = new ProjectFileService();
+        }
+        
         private Dictionary<string, string> _dictionary = new Dictionary<string, string>();
         private Dictionary<string, string> _dictionaryWithKeyNotEqualValue = new Dictionary<string, string>();
 
         private string _rootNamespace = default;
-        public void Start()
+        public void Start(string rootPath)
         {
+            _folderSerivce.CompareProjectFolderWithCsprojFile(rootPath);
             var dirs = Directory.GetDirectories(rootPath, "*").ToList();
 
             var foldersList = new List<string>();
             foreach (var folder in dirs)
             {
                 var name = folder.Remove(0, rootPath.Length);
-                FilterList(foldersList, name, folder);
+                FilterList(foldersList, name, folder, rootPath);
             }
 
             RemoveEqualNamespaces();
-            ChangeNamespaceInAllFiles();
+            ChangeNamespaceInAllFiles(rootPath);
 
         }
 
@@ -40,7 +48,7 @@ namespace NamespaceFixer
             }
         }
 
-        private void ChangeNamespaceInAllFiles()
+        private void ChangeNamespaceInAllFiles(string rootPath)
         {
             var files = Directory.GetFiles(rootPath, "*.*", SearchOption.AllDirectories);
             var myFiles = files.Where(item => !item.Contains("obj")).ToList();
@@ -106,22 +114,7 @@ namespace NamespaceFixer
             }
         }
 
-        private string GetRootNamespace(string file)
-        {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(file);
-
-            XmlNode node = doc.DocumentElement.SelectSingleNode("//RootNamespace");
-            if (node is null)
-            {
-                return default;
-            }
-            else
-            {
-                var rootNamespace = node.InnerText;
-                return rootNamespace;
-            }
-        }
+        
 
         private void FilterFiles(List<string> fileList, List<string> files)
         {
@@ -129,7 +122,7 @@ namespace NamespaceFixer
             fileList.AddRange(cSharpfiles);
         }
 
-        private void FilterList(List<string> foldersList, string name, string folder)
+        private void FilterList(List<string> foldersList, string name, string folder, string rootPath)
         {
             if (name.StartsWith("\\.") || name.Contains("bin") || name.Contains("obj") || name.Contains("Properties") || name.Contains("Pipelines") || name.Contains("Git") || name.Contains("Migrations"))
             {
@@ -158,7 +151,7 @@ namespace NamespaceFixer
                     if (files.Count == 1 && files.First().EndsWith(".csproj"))
                     {
                         var projectFile = files.First(item => item.EndsWith(".csproj"));
-                        _rootNamespace = GetRootNamespace(projectFile);
+                        _rootNamespace = _projectFileService.GetRootNamespace(projectFile);
                     }
 
                     FilterFiles(fileList, files);
@@ -167,14 +160,14 @@ namespace NamespaceFixer
 
                     foreach (var namespaceItem in namespaceList)
                     {
-                        var nm = CheckProjectFile(files, dir);
+                        var nm = CheckProjectFile(files, dir, rootPath);
                         _dictionary.Add(namespaceItem, nm);
                     }
                 }
             }
         }
 
-        private string CreateNamespace(string dir)
+        private string CreateNamespace(string dir, string rootPath)
         {
             //Antar at folders har riktig navn
             var rootFolder = dir.Remove(0, rootPath.Length+1);
@@ -200,7 +193,7 @@ namespace NamespaceFixer
             return list;
         }
 
-        private string CheckProjectFile(List<string> files, string dir)
+        private string CheckProjectFile(List<string> files, string dir, string rootPath)
         {
             var projectFile = files.SingleOrDefault(item => item.EndsWith(".csproj"));
             if (projectFile is null)
@@ -208,11 +201,11 @@ namespace NamespaceFixer
             }
             else
             {
-                _rootNamespace = GetRootNamespace(projectFile);
+                _rootNamespace = _projectFileService.GetRootNamespace(projectFile);
             }
             if (_rootNamespace is null)
             {
-                return CreateNamespace(dir);
+                return CreateNamespace(dir, rootPath);
             }
             else
             {
