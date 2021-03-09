@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -22,7 +23,15 @@ namespace NamespaceFixer
                 return 1;
             }
             //var rootPath = @"C:\Users\serge\source\repos\WebApplication1";
+
+            var stopWatch = new Stopwatch();
+
+            stopWatch.Start();
+
             new ApplicationStarter().Start(rootPath);
+            
+            stopWatch.Stop();
+            Console.WriteLine($"Time Elapsed: {stopWatch.Elapsed}");
             return 0; 
         }
     }
