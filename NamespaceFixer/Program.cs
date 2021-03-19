@@ -33,8 +33,15 @@ namespace NamespaceFixer
             var stopWatch = new Stopwatch();
 
             stopWatch.Start();
-
-            new ApplicationStarter().Start(rootPath);
+            try
+            {
+                new ApplicationStarter().Start(rootPath);
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine($"Got Exception: {exception}");
+                return 1;
+            }
 
             stopWatch.Stop();
             Console.WriteLine($"Time Elapsed: {stopWatch.Elapsed}");

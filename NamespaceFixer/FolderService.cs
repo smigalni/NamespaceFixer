@@ -12,47 +12,54 @@ namespace NamespaceFixer
         {
             _projectFileService = new ProjectFileService();
         }
-        public List<string> CompareProjectFolderWithCsprojFile(string rootPath)
+        public List<string> RunDifferentChecks(string rootPath)
         {
-            var listDirs = new List<string>();
-            var paths = Directory.GetFiles(rootPath, "*.csproj", SearchOption.AllDirectories).ToList();
+            var projectFolders = new List<string>();
+            var projectFiles = new List<string>();
 
-            var csprojList = new List<string>();
-            var rootNamespaceList = new List<string>();
+            var paths = Directory.GetFiles(rootPath, "*.csproj", SearchOption.AllDirectories).ToList();          
 
             foreach (var path in paths)
             {
-                var filename = Path.GetFileName(path).Replace(".csproj", string.Empty);
-                csprojList.Add(filename);
-                var dirName = Path.GetDirectoryName(path);
-                listDirs.Add(dirName);
-                var lastDirName = dirName.Split(Path.DirectorySeparatorChar).Last();
+                var folderName = ProjectFileFolderShouldBeTheSameWithProjectFileName(projectFolders, projectFiles, path);
 
-                if (filename != lastDirName)
-                {
-                    Console.WriteLine($"Project file is {filename}.csproj but project file folder is {lastDirName}. Should be the same. Check the folder {dirName}");
+                _projectFileService.CheckRootNamespaces(projectFiles, path);
 
-                    throw new Exception($"Project file is {filename}.csproj but project file folder is {lastDirName}. Should be the same. Check the folder {dirName}");
-                }
-                rootNamespaceList.Add(_projectFileService.GetRootNamespace(path));
-
-                CheckRootNamespaces(csprojList,rootNamespaceList);
+                _projectFileService
+                    .CheckThatFolderIncludesCsFiles(folderName);
             }
-            return listDirs;
-
+            return projectFolders;
         }
 
-        private void CheckRootNamespaces(List<string> csprojList, List<string> rootNamespaceList)
+        private string ProjectFileFolderShouldBeTheSameWithProjectFileName(
+            List<string> projectFolders, 
+            List<string> projectFiles, string path)
         {
-            if (!rootNamespaceList.Any())
-            {
-                return;
-            }
-            if (csprojList.Count != rootNamespaceList.Count)
-            {
-                Console.WriteLine("Check that all project files has RootNamespace");
+            var filename = Path.GetFileName(path).Replace(".csproj", string.Empty);
+            projectFiles.Add(filename);
 
+            var folderName = Path.GetDirectoryName(path);
+            projectFolders.Add(folderName);
+            var projectFolderName = folderName.Split(Path.DirectorySeparatorChar).Last();
+
+            if (filename != projectFolderName)
+            {
+                LogAndThrowException(filename, folderName, projectFolderName);
             }
+
+            return folderName;
+        }
+
+        private static void LogAndThrowException(string filename, string folderName, string projectFolderName)
+        {
+            Console.WriteLine($"Project file is {filename}.csproj " +
+                $"but project file folder is {projectFolderName}. " +
+                $"Should be the same. Check the folder {folderName}");
+
+            throw new Exception($"Project file is {filename}.csproj " +
+                $"but project file folder is {projectFolderName}. " +
+                $"" +
+                $"Should be the same. Check the folder {folderName}");
         }
     }
 }

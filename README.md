@@ -22,3 +22,11 @@ NamespaceFixer.exe c:\absolute\path\to\sln\file
 ```
 
 Use Source Control for your solution before run analyze.
+
+This application analyzes following:
+* Project file folder should have the same name as project file. F.ex. if your project file is `WebApplication1.csproj`
+the project folder where you have this file should be `WebApplication1`. Throws exception.
+
+* Either all project files have RootNamespace or none. Warning is given.
+
+* All .cs files should have namespace. Throws exception.
