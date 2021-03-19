@@ -9,30 +9,36 @@ namespace NamespaceFixer
     {
         static int Main(string[] args)
         {
-            if (!args.Any())
+            string rootPath;
+            if (Debugger.IsAttached)
             {
-                Console.WriteLine("Please enter an existing path to your solution you want to analyze.");
-                return 1;
+                rootPath = @"C:\Users\serge\source\repos\WebApplication1";
             }
-
-            var rootPath = args[0];
-
-            if (!Directory.Exists(rootPath))
+            else
             {
-                Console.WriteLine($"Path {rootPath} doesn't exist. ");
-                return 1;
-            }
-            //var rootPath = @"C:\Users\serge\source\repos\WebApplication1";
+                if (!args.Any())
+                {
+                    Console.WriteLine("Please enter an existing path to your solution you want to analyze.");
+                    return 1;
+                }
+                rootPath = args[0];
 
+                if (!Directory.Exists(rootPath))
+                {
+                    Console.WriteLine($"Path {rootPath} doesn't exist. ");
+                    return 1;
+                }                
+            }
+           
             var stopWatch = new Stopwatch();
 
             stopWatch.Start();
 
             new ApplicationStarter().Start(rootPath);
-            
+
             stopWatch.Stop();
             Console.WriteLine($"Time Elapsed: {stopWatch.Elapsed}");
-            return 0; 
+            return 0;
         }
     }
 }

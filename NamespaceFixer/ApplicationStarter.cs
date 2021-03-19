@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -23,7 +24,6 @@ namespace NamespaceFixer
         public void Start(string rootPath)
         {
             var dirList = _folderSerivce.CompareProjectFolderWithCsprojFile(rootPath);
-            //var dirs = Directory.GetDirectories(rootPath, "*").ToList();
 
             var foldersList = new List<string>();
             foreach (var folder in dirList)
@@ -103,7 +103,17 @@ namespace NamespaceFixer
             {              
                 var arrLine = File.ReadAllLines(file).ToList();
 
-                string nm = arrLine.Single(item => item.Contains("namespace")).Replace("namespace", "").Trim();
+                string nm;
+                try
+                {
+                    nm = arrLine.Single(item => item.Contains("namespace")).Replace("namespace", "").Trim();
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine($"Could not find namespace in the file: {file}");
+                    throw;
+                }
+                
 
                 var tets = namespaceList.Where(item => item == nm);
 
@@ -161,7 +171,10 @@ namespace NamespaceFixer
                     foreach (var namespaceItem in namespaceList)
                     {
                         var nm = CheckProjectFile(files, dir, rootPath);
-                        _dictionary.Add(namespaceItem, nm);
+                        if (!_dictionary.TryGetValue(namespaceItem, out string key))
+                        {
+                            _dictionary.Add(namespaceItem, nm);
+                        }
                     }
                 }
             }
