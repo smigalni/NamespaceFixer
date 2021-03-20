@@ -40,7 +40,8 @@ namespace NamespaceFixer
 
             var folderName = Path.GetDirectoryName(path);
             projectFolders.Add(folderName);
-            var projectFolderName = folderName.Split(Path.DirectorySeparatorChar).Last();
+           
+            var projectFolderName = ProjectFolderNameService.GetProjectFolderName(folderName);
 
             if (filename != projectFolderName)
             {

@@ -18,52 +18,43 @@ namespace NamespaceFixer
             _projectFileService = new ProjectFileService();
 
         }
-        public void FilterList(string name, string folder, string rootPath)
+        public void FilterList(string folder, string rootPath)
         {
+            var projectFolderName = ProjectFolderNameService.GetProjectFolderName(folder);
+
             var foldersList = new List<string>();
-            if (name.StartsWith("\\.") || name.Contains("bin") || name.Contains("obj") || name.Contains("Properties") || name.Contains("Pipelines") || name.Contains("Git") || name.Contains("Migrations"))
+
+            var filteredDirectories = SourceFilesService.GetFoldersWithSourceFiles(folder);
+            filteredDirectories.Add(folder);
+
+
+            foreach (var dir in filteredDirectories)
             {
-            }
-            else
-            {
-                string[] paths = { rootPath, folder };
-                string fullPath = Path.Combine(paths);
+                var fileList = new List<string>();
 
-                var dirs = Directory.GetDirectories(fullPath, "*", SearchOption.AllDirectories).ToList();
+                foldersList.Add(dir);
+                var files = Directory.GetFiles(dir).ToList();
 
-                var filteredDirs = new List<string>();
-                filteredDirs.Add(folder);
-                filteredDirs.AddRange(FilteredDirs(dirs, fullPath));
+                //case when only one project file
+                //if (files.Count == 1 && files.First().EndsWith(".csproj"))
+                //{
+                //    var projectFile = files.First(item => item.EndsWith(".csproj"));
+                //    _rootNamespace = _projectFileService.GetRootNamespace(projectFile);
+                //}
 
+                SourceFilesService.FilterFiles(fileList, files);
 
-                foreach (var dir in filteredDirs)
+                var namespaceList = NamespacesService.GetAllnamespacesFromFiles(fileList);
+
+                foreach (var namespaceItem in namespaceList)
                 {
-                    var fileList = new List<string>();
-                    var namespaceList = new List<string>();
-
-                    foldersList.Add(dir);
-                    var files = Directory.GetFiles(dir).ToList();
-
-                    //case when only one project file
-                    if (files.Count == 1 && files.First().EndsWith(".csproj"))
+                    var nm = CheckProjectFile(files, dir, rootPath);
+                    if (!_dictionary.TryGetValue(namespaceItem, out string key))
                     {
-                        var projectFile = files.First(item => item.EndsWith(".csproj"));
-                        _rootNamespace = _projectFileService.GetRootNamespace(projectFile);
-                    }
-
-                    FilterFiles(fileList, files);
-
-                    GetAllnamespacesFromFiles(namespaceList, fileList);
-
-                    foreach (var namespaceItem in namespaceList)
-                    {
-                        var nm = CheckProjectFile(files, dir, rootPath);
-                        if (!_dictionary.TryGetValue(namespaceItem, out string key))
-                        {
-                            _dictionary.Add(namespaceItem, nm);
-                        }
+                        _dictionary.Add(namespaceItem, nm);
                     }
                 }
+                //}
             }
 
             RemoveEqualNamespaces();
@@ -71,55 +62,10 @@ namespace NamespaceFixer
             ChangeNamespaceInAllFiles(rootPath);
         }
 
-        private List<string> FilteredDirs(List<string> dirs, string fullPath)
-        {
-            var list = new List<string>();
+       
 
-            foreach (var dir in dirs)
-            {
-                var name = dir.Remove(0, fullPath.Length);
-                if (name.StartsWith("\\.") || name.Contains("bin") || name.Contains("obj") || name.Contains("Properties") || name.Contains("Pipelines") || name.Contains("Git") || name.Contains("Migrations"))
-                {
-                }
-                else
-                {
-                    list.Add(dir);
-                }
-            }
-            return list;
-        }
-
-        private void FilterFiles(List<string> fileList, List<string> files)
-        {
-            var cSharpfiles = files.Where(item => item.EndsWith(".cs"));
-            fileList.AddRange(cSharpfiles);
-        }
-        private void GetAllnamespacesFromFiles(List<string> namespaceList, List<string> fileList)
-        {
-            foreach (var file in fileList)
-            {
-                var arrLine = File.ReadAllLines(file).ToList();
-
-                string nm;
-                try
-                {
-                    nm = arrLine.Single(item => item.Contains("namespace")).Replace("namespace", "").Trim();
-                }
-                catch (Exception)
-                {
-                    Console.WriteLine($"Could not find namespace in the file: {file}");
-                    throw;
-                }
-
-
-                var tets = namespaceList.Where(item => item == nm);
-
-                if (!tets.Any())
-                {
-                    namespaceList.Add(nm);
-                }
-            }
-        }
+      
+        
         private string CheckProjectFile(List<string> files, string dir, string rootPath)
         {
             var projectFile = files.SingleOrDefault(item => item.EndsWith(".csproj"));
@@ -167,7 +113,7 @@ namespace NamespaceFixer
             var files = Directory.GetFiles(rootPath, "*.*", SearchOption.AllDirectories);
             var myFiles = files.Where(item => !item.Contains("obj")).ToList();
             var newFileList = new List<string>();
-            FilterFiles(newFileList, myFiles);
+            SourceFilesService.FilterFiles(newFileList, myFiles);
 
             foreach (var file in newFileList)
             {
