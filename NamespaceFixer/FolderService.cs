@@ -17,16 +17,22 @@ namespace NamespaceFixer
             var projectFolders = new List<string>();
             var projectFiles = new List<string>();
 
-            var paths = Directory.GetFiles(rootPath, "*.csproj", SearchOption.AllDirectories).ToList();          
+            var paths = _projectFileService.GetAllProjectFiles(rootPath);
 
+            var rootNamespaceList = new List<string>();
             foreach (var path in paths)
             {
                 var folderName = ProjectFileFolderShouldBeTheSameWithProjectFileName(projectFolders, projectFiles, path);
 
-                _projectFileService.CheckRootNamespaces(projectFiles, path);
+                _projectFileService.CheckRootNamespaces(path, rootNamespaceList);
 
                 _projectFileService
                     .CheckThatFolderIncludesCsFiles(folderName);
+            }
+            if (paths.Count != rootNamespaceList.Count)
+            {
+                Console.WriteLine("Some project files has RootNamespace, but some doesn't. Check that all project files has RootNamespace or remove RootNamespaces from alle project files.");
+
             }
             return projectFolders;
         }
@@ -35,7 +41,7 @@ namespace NamespaceFixer
             List<string> projectFolders, 
             List<string> projectFiles, string path)
         {
-            var filename = Path.GetFileName(path).Replace(".csproj", string.Empty);
+            var filename = ProjectFileService.GetProjectFileName(path);
             projectFiles.Add(filename);
 
             var folderName = Path.GetDirectoryName(path);

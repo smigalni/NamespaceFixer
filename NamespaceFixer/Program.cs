@@ -12,7 +12,8 @@ namespace NamespaceFixer
             string rootPath;
             if (Debugger.IsAttached)
             {
-                rootPath = @"C:\Users\serge\source\repos\WebApplication1";
+                //rootPath = @"C:\Users\serge\source\repos\WebApplication1";
+                rootPath = @"C:\Users\serge\source\repos\Infinitum.Pas.Stores.Service";
             }
             else
             {

@@ -1,4 +1,6 @@
-﻿namespace NamespaceFixer
+﻿using System.Collections.Generic;
+
+namespace NamespaceFixer
 {
     public class ApplicationStarter
     {
@@ -15,12 +17,18 @@
       
         public void Start(string rootPath)
         {
+            var namespaceDictionary = new Dictionary<string, NamespaceEntity>();
+            var usingDictionary = new Dictionary<string, string>();
+
             var projectFolders = _folderSerivce.RunDifferentChecks(rootPath);
 
             foreach (var folder in projectFolders)
             {
-                _projectFolderService.FilterList(folder, rootPath);
+                _projectFolderService.FilterList(namespaceDictionary, usingDictionary, folder, rootPath);
             }
+            var namespaceDictionaryUnique = NamespacesService.RemoveEqualNamespaces(namespaceDictionary);
+
+            ChangeNamespacesAndUsingService.Change(rootPath, namespaceDictionaryUnique, usingDictionary);
         }   
     }
 }

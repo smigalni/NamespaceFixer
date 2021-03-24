@@ -8,7 +8,7 @@ namespace NamespaceFixer
 {
     public class ProjectFileService
     {      
-        public string GetRootNamespace(string file)
+        public static string GetRootNamespace(string file)
         {
             var doc = new XmlDocument();
             doc.Load(file);
@@ -24,30 +24,35 @@ namespace NamespaceFixer
                 return rootNamespace;
             }
         }
-        public void CheckRootNamespaces(List<string> projectFiles,
-            string path)
+        public void CheckRootNamespaces(string path,
+            List<string> rootNamespaceList)
         {
-            var rootNamespaceList = new List<string> {
-                GetRootNamespace(path)
-            };
-
-            if (!rootNamespaceList.Any())
-            {
-                return;
-            }
-            if (projectFiles.Count != rootNamespaceList.Count)
-            {
-                Console.WriteLine("Some project files has RootNamespace, but some doesn't. Check that all project files has RootNamespace or remove RootNamespaces from alle project files.");
-
-            }
+            rootNamespaceList.Add(GetRootNamespace(path));           
         }
+
         public void CheckThatFolderIncludesCsFiles(string folderName)
         {
-            var csFiles = Directory.GetFiles(folderName, "*.cs", SearchOption.TopDirectoryOnly).ToList();
+            var csFiles = Directory.GetFiles(folderName, "*.cs", SearchOption.AllDirectories).ToList();
             if (!csFiles.Any())
             {
-                Console.WriteLine($"There is no cs files in this project folder. Probably delete this folder.");
+                Console.WriteLine($"There is no cs files in the project folder {folderName}. Probably delete this folder.");
             }
+        }
+        public List<string> GetAllProjectFiles(string rootPath)
+        {
+            return Directory
+                .GetFiles(rootPath, "*.csproj", SearchOption.AllDirectories)
+                .ToList();
+        }
+        public static string GetProjectFile(string rootPath)
+        {
+            return Directory
+                .GetFiles(rootPath, "*.csproj", SearchOption.TopDirectoryOnly)
+                .Single();
+        }
+        public static string GetProjectFileName(string path)
+        {
+            return Path.GetFileName(path).Replace(".csproj", string.Empty);
         }
     }
 }
