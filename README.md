@@ -3,7 +3,7 @@
 Are you doing some refactoring or restructuring  and forget to buy ReSharper license? Here is solution for you.
 This small application changes your using statement and namespaces.
 
-Runs only on Windows and analyzes only C# projects.
+Analyzes only C# .NET Core projects. 
 
 Build your application which you want to analyze. Should be 0 build errors.
 
@@ -33,4 +33,4 @@ the project folder where you have this file should be `WebApplication1`. Throws 
 
 * All .cs files should have namespaces. Throws exception.
 
-All namespaces will be fixed, but some work on using statemets is expected because this application doesn't do any code analyze.
+All namespaces will be fixed, but some manual work on using statemets is expected because this application doesn't do any code analyze(yet :-)).
