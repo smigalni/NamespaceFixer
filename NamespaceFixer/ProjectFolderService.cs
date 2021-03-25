@@ -6,18 +6,7 @@ using System.Linq;
 namespace NamespaceFixer
 {
     public class ProjectFolderService
-    {
-        private readonly ProjectFileService _projectFileService;
-        private string _rootNamespace = default;
-        private Dictionary<string, string> _dictionary = new Dictionary<string, string>();
-        //private Dictionary<string, NamespaceEntity> _namespaceDictionaryUnique = new Dictionary<string, NamespaceEntity>();
-        private Dictionary<string, string> _dictionaryWithKeyNotEqualValue = new Dictionary<string, string>();
-
-        public ProjectFolderService()
-        {
-            _projectFileService = new ProjectFileService();
-
-        }
+    {   
         public void FilterList(Dictionary<string, NamespaceEntity> namespaceDictionary,
             Dictionary<string, string> usingDictionary,
             string folder, string rootPath)
@@ -27,23 +16,14 @@ namespace NamespaceFixer
             var foldersList = new List<string>();
 
             var filteredDirectories = SourceFilesService.GetFoldersWithSourceFiles(folder);
-            filteredDirectories.Add(folder);
-
-            
+            filteredDirectories.Add(folder);            
 
             foreach (var dir in filteredDirectories)
             {
                 var fileList = new List<string>();               
 
                 foldersList.Add(dir);
-                var files = Directory.GetFiles(dir).ToList();
-
-                //case when only one project file
-                //if (files.Count == 1 && files.First().EndsWith(".csproj"))
-                //{
-                //    var projectFile = files.First(item => item.EndsWith(".csproj"));
-                //    _rootNamespace = _projectFileService.GetRootNamespace(projectFile);
-                //}
+                var files = Directory.GetFiles(dir).ToList();               
 
                 SourceFilesService.FilterFiles(fileList, files);
 
@@ -70,7 +50,6 @@ namespace NamespaceFixer
                         usingDictionary.Add(namespaceKey, correctNamespace);
                     }
                 }
-                //}
             }           
         }
     }

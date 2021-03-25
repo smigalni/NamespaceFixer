@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -7,7 +8,7 @@ namespace NamespaceFixer
 {
     public static class ChangeNamespacesAndUsingService
     {
-        private static int _numberOfFilesTotal;
+        private static int _numberOfCodeLinesTotal;
         public static void Change(string rootPath,
             Dictionary<string, NamespaceEntity> namespaceDictionary,
             Dictionary<string, string> usingDictionary)
@@ -23,7 +24,7 @@ namespace NamespaceFixer
                 var folderName = directory.Remove(0, rootPath.Length + 1);
 
                 var allLinesFromFile = File.ReadAllLines(file);
-                _numberOfFilesTotal += allLinesFromFile.Count();
+                _numberOfCodeLinesTotal += allLinesFromFile.Count();
 
                 var fileChanged = false;
 
@@ -67,55 +68,8 @@ namespace NamespaceFixer
                     File.WriteAllLines(file, allLinesFromFile, Encoding.UTF8);
                 }
             }
-        }
-
-        //private static void Change1(string rootPath)
-        //{
-        //    var files = Directory.GetFiles(rootPath, "*.*", SearchOption.AllDirectories);
-        //    var myFiles = files.Where(item => !item.Contains("obj")).ToList();
-        //    var newFileList = new List<string>();
-        //    SourceFilesService.FilterFiles(newFileList, myFiles);
-
-        //    foreach (var file in newFileList)
-        //    {
-        //        string[] arrLine = File.ReadAllLines(file);
-        //        var fileChanged = false;
-        //        for (int i = 0; i < arrLine.Count(); ++i)
-        //        {
-        //            if (arrLine[i].Contains("using"))
-        //            {
-        //                var usingItem = arrLine[i].Replace("using", string.Empty).Replace(";", string.Empty).Trim();
-        //                _dictionaryWithKeyNotEqualValue.TryGetValue(usingItem, out string value);
-        //                if (value is null)
-        //                {
-
-        //                }
-        //                else
-        //                {
-        //                    fileChanged = true;
-        //                    arrLine[i] = arrLine[i].Replace(usingItem, _dictionary[usingItem]);
-        //                }
-        //            }
-        //            else if (arrLine[i].Contains("namespace"))
-        //            {
-        //                var namespaceItem = arrLine[i].Replace("namespace", "").Trim();
-        //                _dictionaryWithKeyNotEqualValue.TryGetValue(namespaceItem, out string value);
-        //                if (value is null)
-        //                {
-
-        //                }
-        //                else
-        //                {
-        //                    fileChanged = true;
-        //                    arrLine[i] = arrLine[i].Replace(namespaceItem, _dictionary[namespaceItem]);
-        //                }
-        //            }
-        //        }
-        //        if (fileChanged)
-        //        {
-        //            File.WriteAllLines(file, arrLine, Encoding.UTF8);
-        //        }
-        //    }
-        //}
+            Console.WriteLine($"The total number of code lines in your solution is {_numberOfCodeLinesTotal}. Migrations included.");
+            Console.WriteLine($"The total number of source files in your solution is {files.Count}.  Migrations included.");
+        }       
     }
 }

@@ -5,14 +5,12 @@ namespace NamespaceFixer
     public class ApplicationStarter
     {
         private readonly FolderService _folderSerivce;
-        private readonly ProjectFolderService _projectFolderService;
-       
+        private readonly ProjectFolderService _projectFolderService;       
 
         public ApplicationStarter()
         {
             _folderSerivce = new FolderService();
-            _projectFolderService = new ProjectFolderService();
-            
+            _projectFolderService = new ProjectFolderService();            
         }  
       
         public void Start(string rootPath)
@@ -28,7 +26,9 @@ namespace NamespaceFixer
             }
             var namespaceDictionaryUnique = NamespacesService.RemoveEqualNamespaces(namespaceDictionary);
 
-            ChangeNamespacesAndUsingService.Change(rootPath, namespaceDictionaryUnique, usingDictionary);
+            var usingDictionaryUnique = NamespacesService.RemoveEqualNamespaces(usingDictionary);
+
+            ChangeNamespacesAndUsingService.Change(rootPath, namespaceDictionaryUnique, usingDictionaryUnique);
         }   
     }
 }

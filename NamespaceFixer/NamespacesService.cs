@@ -36,7 +36,7 @@ namespace NamespaceFixer
                 CheckIfAlreadyExists(rootPath, namespaceEntities, namespaceFromFile, projecFolder, directory);
             }
             return namespaceEntities;
-        }
+        }      
 
         private static void CheckIfAlreadyExists(string rootPath,
             List<NamespaceEntity> namespaceEntities,
@@ -116,6 +116,18 @@ namespace NamespaceFixer
             }
             return namespaceDictionaryUnique;
         }
-        
+        public static Dictionary<string, string> RemoveEqualNamespaces(Dictionary<string, string> usingDictionary)
+        {
+            var dictionary = new Dictionary<string, string>();
+            foreach (var item in usingDictionary)
+            {
+                if (item.Key != item.Value)
+                {
+                    dictionary[item.Key] = item.Value;
+                }
+            }
+            return dictionary;
+        }
+
     }
 }
